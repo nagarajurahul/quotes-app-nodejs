@@ -1,8 +1,13 @@
-const express = require("express");
+import express from "express";
+import helloRoute from "./routes/hello.js";
+import healthRoute from "./routes/health.js";
+import quotesRoute from "./routes/quotes.js";
+
 const app = express();
 
-// Routes
-app.use("/hello", require("./routes/hello"));
-app.use("/health", require("./routes/health"));
+// Mount routers
+app.use("/hello", helloRoute);
+app.use("/health", healthRoute);
+app.use("/quotes", quotesRoute);
 
-module.exports = app;
+export default app;

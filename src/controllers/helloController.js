@@ -1,3 +1,3 @@
-exports.getHello = (req, res) => {
+export const getHello = (req, res) => {
   res.send("Hello World From Quotes App!");
 };

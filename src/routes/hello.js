@@ -1,7 +1,9 @@
-const express = require("express");
-const router = express.Router();
-const { getHello } = require("../controllers/helloController");
+import express from "express";
+import { getHello } from "../controllers/helloController.js";
+
+const router = express.Router()
 
 router.get("/", getHello);
 
-module.exports = router;
+
+export default router;

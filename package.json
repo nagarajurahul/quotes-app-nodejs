@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "quotes-app-nodejs",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "scan": "npm audit --audit-level=moderate",
-    "test": "jest --coverage"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -23,7 +24,9 @@
   },
   "homepage": "https://github.com/nagarajurahul/quotes-app-nodejs#readme",
   "dependencies": {
-    "express": "^5.1.0"
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "mysql2": "^3.14.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",

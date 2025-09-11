@@ -8,3 +8,7 @@ Steps execution
 - Install `Jest + Supertest` for Testing
 - Run - `npm start` to start application
 - Add GitHub Workflows for `CI`
+- Setup SQL for dev
+- Install mysql and dotenv
+- Configure env variables
+- Write random quotes function and expose api
