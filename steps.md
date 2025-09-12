@@ -11,4 +11,5 @@ Steps execution
 - Setup SQL for dev
 - Install mysql and dotenv
 - Configure env variables
+- Establish DB
 - Write random quotes function and expose api
