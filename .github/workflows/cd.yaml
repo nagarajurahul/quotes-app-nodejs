@@ -1,0 +1,49 @@
+name: "Deploy in App-Service"
+
+on:
+  workflow_dispatch:   # manual trigger
+    inputs:
+      environment:
+        description: "Environment to deploy (dev/stage/production)"
+        required: true
+        default: "production"
+
+
+jobs:
+ deploy:
+   name: "App-Service Deploy"
+   runs-on: ubuntu-24.04
+
+   steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Security Audit
+        run: npm run scan
+        
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true       
+          
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.APP_NAME }}
+          package: .
