@@ -33,7 +33,7 @@ COPY --from=build /usr/src/app/src ./src
 RUN addgroup -S app && adduser -S app -G app
 USER app
 
-EXPOSE 3000
+EXPOSE 8080
 
 # Healthcheck (expects /health endpoint in your app)
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
