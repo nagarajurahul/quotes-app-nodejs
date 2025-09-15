@@ -7,7 +7,10 @@ on:
         description: "Environment to deploy (dev/stage/production)"
         required: true
         default: "production"
-
+env:
+  ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+  ACR_NAME: ${{ secrets.ACR_NAME }}
+  IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
 
 jobs:
  deploy:
@@ -42,8 +45,14 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true       
           
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ secrets.APP_NAME }}
-          package: .
+      - name: Docker Build
+        run: docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:latest .
+
+      - name: Docker Push
+        run: docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
+          
+      # - name: Deploy to Azure Web App
+      #   uses: azure/webapps-deploy@v3
+      #   with:
+      #     app-name: ${{ secrets.APP_NAME }}
+      #     package: .
