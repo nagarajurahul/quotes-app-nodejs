@@ -1,4 +1,4 @@
-name: "Deploy in App-Service"
+name: "Deploy Image to ACR"
 
 on:
   workflow_dispatch:   # manual trigger
@@ -43,8 +43,14 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          enable-AzPSSession: true       
+          enable-AzPSSession: true  
           
+      - name: Verify Docker
+        run: docker --version
+          
+      - name: Azure ACR Login
+        run: az acr login --name $ACR_NAME        
+        
       - name: Docker Build
         run: docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:latest .
 
