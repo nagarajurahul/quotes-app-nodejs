@@ -19,11 +19,9 @@ FROM node:22-alpine AS runtime
 WORKDIR /usr/src/app
 ENV NODE_ENV=production
 
-RUN apk add --no-cache dumb-init
+RUN apk add --no-cache dumb-init tzdata curl
 
-COPY --from=build /usr/src/app/package*.json ./
-COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/src ./src
+COPY --from=build /usr/src/app ./
 
 RUN addgroup -S app && adduser -S app -G app \
   && chown -R app:app /usr/src/app

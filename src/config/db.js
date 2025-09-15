@@ -1,17 +1,38 @@
-import mysql from "mysql2/promise";
+import sql from "mssql";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+const config = {
+  user: process.env.DB_USER,       
+  password: process.env.DB_PASS,   
+  server: process.env.DB_HOST,     
+  database: process.env.DB_NAME,   
+  port: parseInt(process.env.DB_PORT, 10) || 1433,
+  options: {
+    encrypt: true,                 
+    trustServerCertificate: false
+  },
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000
+  }
+};
 
-export default pool;
+let poolPromise;
+
+export async function getPool() {
+  if (!poolPromise) {
+    poolPromise = sql.connect(config)
+      .then(pool => {
+        console.log("Connected to Azure SQL");
+        return pool;
+      })
+      .catch(err => {
+        console.error("Database connection failed", err);
+        throw err;
+      });
+  }
+  return poolPromise;
+}
