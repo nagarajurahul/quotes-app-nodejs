@@ -1,0 +1,15 @@
+# Node stuff
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Test / coverage
+coverage
+tests
+*.test.js
+jest.config.js
+
+# Dev / local files
+.eslint*
+*.md
+steps.md
