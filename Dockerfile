@@ -1,5 +1,5 @@
 # -------- Base image --------
-FROM node:22-alpine AS bash
+FROM node:22-alpine AS base
 WORKDIR /usr/src/app
 
 # -------- Dependencies layer --------
@@ -12,24 +12,19 @@ RUN npm ci --omit=dev
 FROM base AS build
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY . .
-# If you had a build step, run it here
-# RUN npm run build
+# RUN npm run build  # (optional)
 
 # -------- Runtime layer --------
-FROM base AS runtime
+FROM node:22-alpine AS runtime
+WORKDIR /usr/src/app
 ENV NODE_ENV=production
-
-# App Service injects $PORT (default 8080). Don’t override it.
-# Just respect it in server.js.
 
 RUN apk add --no-cache dumb-init
 
-# Copy only what’s needed for runtime
 COPY --from=build /usr/src/app/package*.json ./
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/src ./src
 
-# Drop privileges
 RUN addgroup -S app && adduser -S app -G app \
   && chown -R app:app /usr/src/app
 USER app
