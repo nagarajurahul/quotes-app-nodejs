@@ -48,12 +48,19 @@ jobs:
       - name: Verify Docker
         run: docker --version
           
-      - name: Azure ACR Login
-        run: az acr login --name $ACR_NAME
+      # - name: Azure ACR Login
+      #   run: az acr login --name $ACR_NAME
 
       # - name: Docker Login (Admin User)
       #   run: echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ env.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin    
-        
+      
+      - name: Docker Login to ACR (AAD Token)
+        run: |
+          TOKEN=$(az acr login --name $ACR_NAME --expose-token --output tsv --query accessToken)
+          echo $TOKEN | docker login $ACR_LOGIN_SERVER \
+            -u 00000000-0000-0000-0000-000000000000 \
+            --password-stdin
+
       - name: Docker Build
         run: docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:latest .
 
