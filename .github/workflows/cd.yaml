@@ -11,6 +11,7 @@ env:
   ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
   ACR_NAME: ${{ secrets.ACR_NAME }}
   IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
+  IMAGE_TAG: ${{ github.sha }}
 
 jobs:
  deploy:
@@ -48,24 +49,31 @@ jobs:
       - name: Verify Docker
         run: docker --version
           
-      # - name: Azure ACR Login
-      #   run: az acr login --name $ACR_NAME
+      - name: Azure ACR Login
+        run: az acr login --name $ACR_NAME
 
       # - name: Docker Login (Admin User)
       #   run: echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ env.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin    
       
-      - name: Docker Login to ACR (AAD Token)
-        run: |
-          TOKEN=$(az acr login --name $ACR_NAME --expose-token --output tsv --query accessToken)
-          echo $TOKEN | docker login $ACR_LOGIN_SERVER \
-            -u 00000000-0000-0000-0000-000000000000 \
-            --password-stdin
+      # - name: Docker Login to ACR (AAD Token)
+      #   run: |
+      #     TOKEN=$(az acr login --name $ACR_NAME --expose-token --output tsv --query accessToken)
+      #     echo $TOKEN | docker login $ACR_LOGIN_SERVER \
+      #       -u 00000000-0000-0000-0000-000000000000 \
+      #       --password-stdin
 
       - name: Docker Build
-        run: docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:latest .
+        run: |
+          docker build \
+            --build-arg NODE_ENV=production \
+            -t $ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG \
+            -t $ACR_LOGIN_SERVER/$IMAGE_NAME:latest .
 
       - name: Docker Push
-        run: docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
+        run: |
+          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG
+          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
+          
           
       # - name: Deploy to Azure Web App
       #   uses: azure/webapps-deploy@v3
