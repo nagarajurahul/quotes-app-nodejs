@@ -34,7 +34,7 @@ jobs:
       run: npm run scan
 
   lint-dockerfile:
-    name: Lint and Scan the code
+    name: Lint Dockerfile
     runs-on: ubuntu-24.04
     
     steps:
