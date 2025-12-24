@@ -7,16 +7,16 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    name: "Lint, Scan and Build"
+  lint-and-scan:
+    name: Lint and Scan the code
     runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: 'lts/*'
         cache: 'npm'
