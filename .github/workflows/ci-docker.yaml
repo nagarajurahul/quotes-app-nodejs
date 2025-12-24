@@ -38,7 +38,11 @@ jobs:
     runs-on: ubuntu-24.04
     
     steps:
-    
+
+      # Checkout repo
+      - name: Checkout code
+        uses: actions/checkout@v6
+
       # Lint Dockerfile
       - name: Dockerfile Lint
         uses: hadolint/hadolint-action@v3.3.0
