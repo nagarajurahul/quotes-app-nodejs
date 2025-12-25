@@ -19,7 +19,10 @@ FROM node:24-alpine AS runtime
 WORKDIR /usr/src/app
 ENV NODE_ENV=production
 
-RUN apk add --no-cache dumb-init tzdata curl
+# Install only runtime OS deps + remove npm to eliminate glob (CVE-2025-64756 – HIGH)
+RUN apk add --no-cache dumb-init tzdata \
+  && rm -rf /usr/local/lib/node_modules/npm \
+  /usr/local/lib/node_modules/corepack
 
 COPY --from=build /usr/src/app ./
 
