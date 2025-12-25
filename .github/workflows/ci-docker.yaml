@@ -111,6 +111,23 @@ jobs:
         ignore-unfixed: true
         vuln-type: 'os,library'
         scanners: vuln
+        exit-code: '0'
 
       continue-on-error: true
-      exit-code: '0'
+
+    - name: Push Docker image (only if scan passed)
+      if: steps.trivy.outcome == 'success'
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGE }}:${{ steps.vars.outputs.IMAGE_TAG }}
+
+      # - name: 🚀 Push image to Docker Hub
+      #   if: steps.trivy.outcome == 'success'
+      #   env:
+      #     IMAGE_TAG: ${{ steps.vars.outputs.IMAGE_TAG }}
+      #   run: |
+      #     docker push ${DOCKERHUB_USERNAME}/${DOCKERHUB_IMAGE}:${IMAGE_TAG
