@@ -99,3 +99,18 @@ jobs:
     #     IMAGE_TAG: ${{ steps.vars.outputs.IMAGE_TAG }}
     #   run: |
     #     docker build -t ${DOCKERHUB_USERNAME}/${DOCKERHUB_IMAGE}:${IMAGE_TAG} .
+
+    - name: Run Trivy vulnerability scanner
+      id: trivy
+      uses: aquasecurity/trivy-action@0.33.1
+      with:
+        image-ref: '${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGE }}:${{ steps.vars.outputs.IMAGE_TAG }}'
+        format: 'json'
+        output: 'trivy-results.json'
+        severity: 'CRITICAL,HIGH'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        scanners: vuln
+
+      continue-on-error: true
+      exit-code: '0'
