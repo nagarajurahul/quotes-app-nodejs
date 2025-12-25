@@ -146,4 +146,9 @@ jobs:
       #   env:
       #     IMAGE_TAG: ${{ steps.vars.outputs.IMAGE_TAG }}
       #   run: |
-      #     docker push ${DOCKERHUB_USERNAME}/${DOCKERHUB_IMAGE}:${IMAGE_TAG
+      #     docker push ${DOCKERHUB_USERNAME}/${DOCKERHUB_IMAGE}:${IMAGE_TAG}
+
+    - name: Generate SBOM
+      uses: anchore/sbom-action@v0
+      with:
+        image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGE }}:${{ steps.vars.outputs.IMAGE_TAG }}
