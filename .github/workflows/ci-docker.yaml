@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: npm ci
       # npm ci is better in production for faster, deterministic image building
-      run: npm install
+      # run: npm install
 
     - name: Run Lint
       run: npm run lint
