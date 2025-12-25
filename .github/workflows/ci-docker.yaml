@@ -113,9 +113,9 @@ jobs:
         ignore-unfixed: true
         vuln-type: 'os,library'
         scanners: vuln
-        exit-code: '0'
+        exit-code: '1'
 
-      continue-on-error: true
+      continue-on-error: false
 
     - name: Push Docker image (only if scan passed)
       if: steps.trivy.outcome == 'success'
