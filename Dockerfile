@@ -30,6 +30,6 @@ RUN addgroup -S app && adduser -S app -G app \
   && chown -R app:app /usr/src/app
 USER app
 
-EXPOSE 8080
+EXPOSE 3000
 
 CMD ["dumb-init", "node", "src/server.js"]
