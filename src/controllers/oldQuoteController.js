@@ -1,13 +1,12 @@
-import pool from "../config/db.js";
+import { getPool } from "../config/db.js";
 
 export const getRandomQuote = async (req, res) => {
   try {
-    // Step 1: Count active quotes
-    const countResult = await pool.query(
-      "SELECT COUNT(*)::int AS total FROM quotes WHERE is_active = true"
-    );
+    const pool = await getPool();
 
-    const total = countResult.rows[0].total;
+    // Step 1: Count only active quotes
+    const countResult = await pool.request().query("SELECT COUNT(*) AS total FROM Quotes WHERE IsActive = 1");
+    const total = countResult.recordset[0].total;
 
     if (total === 0) {
       return res.status(404).json({ message: "No active quotes found" });
@@ -16,37 +15,43 @@ export const getRandomQuote = async (req, res) => {
     // Step 2: Pick random offset
     const randomOffset = Math.floor(Math.random() * total);
 
-    // Step 3: Fetch random quote
-    const quoteResult = await pool.query(
-      `
-      SELECT quote_id, quote_text, author, category, created_at
-      FROM quotes
-      WHERE is_active = true
-      ORDER BY quote_id
-      OFFSET $1
-      LIMIT 1
-      `,
-      [randomOffset]
-    );
+    // Step 3: Fetch one random active quote
+    const result = await pool.request()
+      .input("offset", randomOffset)
+      .query(`
+        SELECT QuoteID, QuoteText, Author, Category, CreatedAt
+        FROM Quotes
+        WHERE IsActive = 1
+        ORDER BY QuoteID
+        OFFSET @offset ROWS
+        FETCH NEXT 1 ROWS ONLY;
+      `);
 
-    const quote = quoteResult.rows[0];
+    const quote = result.recordset[0];
 
     if (!quote) {
       return res.status(404).json({ message: "Quote not found" });
     }
 
-    // Step 4: Audit log
-    await pool.query(
-      `
-      INSERT INTO quote_audit (quote_id, accessed_by, action)
-      VALUES ($1, $2, $3)
-      `,
-      [
-        quote.quote_id,
-        "webapp-quotesapp-prod", // later: k8s SA / workload identity
-        "READ"
-      ]
-    );
+    // Step 4: Log access in QuoteAudit (PII audit trail)
+    await pool.request()
+      .input("quoteId", quote.QuoteID)
+      .input("accessedBy", "webapp-quotesapp-prod") // use MSI / service principal name in real app
+      .input("action", "READ")
+      .query(`
+        INSERT INTO QuoteAudit (QuoteID, AccessedBy, Action)
+        VALUES (@quoteId, @accessedBy, @action);
+      `);
+
+    // Step 5: Return response
+    // res.json({
+    //   id: quote.QuoteID,
+    //   quote_text: quote.QuoteText,
+    //   author: quote.Author,
+    //   category: quote.Category,
+    //   created_at: quote.CreatedAt
+    // });
+
 
     // 🎨 Dynamic gradients with button colors (purple/blue only)
     const themes = [
@@ -114,11 +119,11 @@ export const getRandomQuote = async (req, res) => {
         <body>
           <div class="card">
             <h1>🌟 Random Quote</h1>
-            <p>"${quote.quote_text}"</p>
-            <div class="author">— ${quote.author}</div>
+            <p>"${quote.QuoteText}"</p>
+            <div class="author">— ${quote.Author}</div>
             <div class="meta">
-              Category: ${quote.category || "General"}<br/>
-              Added: ${new Date(quote.created_at).toLocaleDateString()}
+              Category: ${quote.Category || "General"}<br/>
+              Added: ${new Date(quote.CreatedAt).toLocaleDateString()}
             </div>
             <form method="GET" action="/quotes/random">
               <button type="submit">Get Another Quote</button>
@@ -130,11 +135,11 @@ export const getRandomQuote = async (req, res) => {
       `);
     } else {
       res.json({
-        id: quote.quote_id,
-        text: quote.quote_text,
-        author: quote.author,
-        category: quote.category,
-        created_at: quote.created_at,
+        id: quote.QuoteID,
+        text: quote.QuoteText,
+        author: quote.Author,
+        category: quote.Category,
+        created_at: quote.CreatedAt,
         theme // 🔑 include theme info for frontend clients too
       });
     }
